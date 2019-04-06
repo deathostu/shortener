@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Services\ShortlinkService;
-use App\Shortlink;
+use App\Statistics;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Validator;
 
 class ShortlinkController extends Controller
 
@@ -35,9 +34,13 @@ class ShortlinkController extends Controller
      */
     public function show($hash)
     {
-        $link = Shortlink::where('hash', $hash)->firstOrFail();
-        $link->counter++;
-        $link->save();
+        $service = new ShortlinkService();
+        $link = $service->getLink($hash);
+        if ($link){
+            $statistics = Statistics::find($link->id);
+            $statistics->counter++;
+            $statistics->save();
+        }
 
         return redirect(urldecode($link->url));
     }
